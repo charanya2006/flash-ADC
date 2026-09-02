@@ -1,10 +1,14 @@
 # flash-ADC
+
 # Flash ADC — StrongARM Latch Comparator & CMOS Priority Encoder
 
 3-bit Flash ADC designed in 180 nm CMOS, using a StrongARM dynamic
 latch comparator array driven by a resistor-ladder reference and a
 CMOS (NAND-only) priority encoder that converts the thermometer code
 to binary.
+
+See the full [project presentation](Flash_ADC_Presentation.pdf).
+
 ---
 
 ## 1. Overview
@@ -29,35 +33,31 @@ Vin ──► [Comparator array] ──► Thermometer code ──► [Priority 
 ## 2. Repository Structure
 
 ```
-flash-adc-strongarm/
+flash-ADC/
 ├── README.md
-├── docs/
-│   ├── Flash_ADC_Presentation.pdf     # full project slide deck
-│   └── design_notes/                  # hand-derived Boolean equations (Q0, Q1, Q2)
-├── schematics/                        # exported schematic PDFs/PNGs
-│   ├── strongarm_comparator.png
-│   ├── resistor_ladder.png
-│   ├── encoder_Q0.png
-│   ├── encoder_Q1.png
-│   └── encoder_Q2.png
-├── netlists/                          # SPICE/Spectre netlists (text, version-controlled)
-│   ├── strongarm_comparator.sp
-│   ├── resistor_ladder.sp
-│   ├── encoder.sp
-│   └── flash_adc_top.sp
-├── testbenches/
-│   ├── tb_comparator_transient.sp
-│   ├── tb_flash_adc_dc_levels.sp      # Vin = 1.6V, 1.4V, 0.9V step tests
-│   └── tb_flash_adc_sine_input.sp     # sine wave, Vdc=0.8V, amplitude=0.8V
-├── results/
-│   ├── waveforms/                     # exported sim plot PNGs
-│   └── truth_table.csv
-├── sizing/
-│   └── transistor_sizing.csv
-└── LICENSE
+├── Flash_ADC_Presentation.pdf   # full project slide deck
+├── design_notes.md              # hand-derived Boolean equations (Q0, Q1, Q2)
+├── comp.png                     # StrongARM comparator schematic
+├── compout.png                  # comparator output waveform
+├── encoder.png                  # full encoder circuit (Q0/Q1/Q2 gate-level)
+├── q0.png                       # Q0 sub-circuit (gate-level)
+├── q1.png                       # Q1 sub-circuit (gate-level)
+├── q2.png                       # Q2 sub-circuit (gate-level)
+├── sinout.png                   # sine-wave input response waveform
+├── transistor_sizing.csv
+├── truth_table.csv
+└── resistor_ladder_voltages.csv
 ```
 
+> **Note:** Raw SPICE/Spectre netlists and testbenches are not
+> included in this repo. The design was implemented and simulated in
+> Cadence Virtuoso/Spectre; results are documented here via the
+> schematic screenshots, waveform captures, sizing tables, and truth
+> table below.
+
 ## 3. Transistor Sizing
+
+Full table: [`transistor_sizing.csv`](transistor_sizing.csv)
 
 ### StrongARM Comparator (W/µm, L = 0.18 µm)
 
@@ -69,6 +69,8 @@ flash-adc-strongarm/
 | M7          | Tail / clock NMOS                  | 4.0    |
 | S1–S4       | Clock / pass transistors           | 3.0    |
 
+See [`comp.png`](comp.png) for the schematic.
+
 ### CMOS Logic Gates (encoder)
 
 | Device               | W (µm) | L (µm) | W/L  |
@@ -76,7 +78,13 @@ flash-adc-strongarm/
 | Logic NMOS (typical) | 0.54   | 0.18   | 3.00 |
 | Logic PMOS (typical) | 1.08   | 0.18   | 6.00 |
 
+See [`encoder.png`](encoder.png) for the full gate-level circuit, or
+[`q0.png`](q0.png), [`q1.png`](q1.png), [`q2.png`](q2.png) for each
+output sub-circuit individually.
+
 ## 4. Resistor Ladder
+
+Full table: [`resistor_ladder_voltages.csv`](resistor_ladder_voltages.csv)
 
 - `Vref+ = 1.8 V`, `Vref- = 0 V`, `R = 100 Ω` per segment
 - Step voltage: `Vstep = 1.8 V / 8 = 0.225 V`
@@ -102,34 +110,22 @@ flash-adc-strongarm/
   to disturb StrongARM regeneration. 2-input NANDs give faster
   switching, better noise margins, and simpler sizing.
 
+Boolean derivations for the priority encoder outputs (Q0, Q1, Q2) are
+in [`design_notes.md`](design_notes.md).
+
 ## 6. Verification
 
-Simulated cases (see `results/waveforms/`):
-- Static `Vin` = 1.6 V, 1.4 V, 0.9 V (DC codes vs. clock)
-- Sine-wave input, `Vdc = 0.8 V`, amplitude = 0.8 V
-- Full thermometer-to-binary truth table (`results/truth_table.csv`)
+Simulated waveforms:
+- [`compout.png`](compout.png) — comparator output vs. clock and input
+- [`sinout.png`](sinout.png) — sine-wave input response, `Vdc = 0.8 V`, amplitude = 0.8 V
+- Full thermometer-to-binary truth table: [`truth_table.csv`](truth_table.csv)
 
 Known non-ideality: brief glitches at code transitions due to
 comparator mismatch/regeneration-delay skew and StrongARM kickback
 noise — these settle out once all comparators resolve.
 
-## 7. How to Run
-
-```bash
-# Example using ngspice / Spectre — adjust for your simulator
-ngspice testbenches/tb_flash_adc_dc_levels.sp
-ngspice testbenches/tb_flash_adc_sine_input.sp
-```
-
-Schematics were originally captured in Cadence Virtuoso; netlists
-under `netlists/` are exported for portability.
-
-## 8. References
+## 7. References
 
 - https://www.seas.ucla.edu/brweb/papers/Journals/BRMagzine4.pdf
 - https://www.allaboutcircuits.com/textbook/digital/chpt-13/flash-adc/
 
-## License
-
-Add a license (e.g. MIT) if you intend this to be reusable coursework
-reference material.
