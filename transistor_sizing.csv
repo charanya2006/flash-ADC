@@ -1,0 +1,8 @@
+Block,Device,Function,W_um,L_um
+StrongARM Comparator,"M1, M2",Input NMOS pair,2.0,0.18
+StrongARM Comparator,"M3, M4",Regenerative NMOS (latch),5.0,0.18
+StrongARM Comparator,"M5, M6",Regenerative PMOS (cross-coupled),12.0,0.18
+StrongARM Comparator,M7,Tail / clock NMOS,4.0,0.18
+StrongARM Comparator,"S1-S4",Clock / pass transistors,3.0,0.18
+CMOS Logic (Encoder),Logic NMOS (typical),2-input NAND pull-down,0.54,0.18
+CMOS Logic (Encoder),Logic PMOS (typical),2-input NAND pull-up,1.08,0.18
